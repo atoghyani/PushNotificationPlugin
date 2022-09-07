@@ -1,43 +1,65 @@
 variables:
-  MONO_VERSION: 6_12_0
-  NETCORE_VERSION: '5.0.x'
-  XCODE_VERSION: 12.3
+  MONO_VERSION: 6_4_0
+  NETCORE_VERSION: '3.0.x'
 
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
+# set the version numbering, this results in 1.0.1 for the first build incrementing that way.
+name: 3.7$(rev:.r)
 
 # Defines that a commit to the master branch should trigger this build
-trigger:
-- master
+# trigger:
+# - master
 
 # Defines that PRs against this branch should also trigger this build
-pr:
-- master
+# pr:
+# - master
 
-# The type of machine this build should run on and what software should be on it
+# the machine and prerequisites to run this build on
 pool:
-  vmImage: macOS-10.15
+  vmImage: macos-12
 
 # The different steps in our build
 steps:
 
-- bash: sudo $AGENT_HOMEDIRECTORY/scripts/select-xamarin-sdk.sh $(MONO_VERSION)
-  displayName: Switch to the latest Xamarin SDK
+# - bash: sudo $AGENT_HOMEDIRECTORY/scripts/select-xamarin-sdk.sh $(MONO_VERSION)
+#   displayName: Switch to the latest Xamarin SDK
 
-- bash: echo '##vso[task.setvariable variable=MD_APPLE_SDK_ROOT;]'/Applications/Xcode_$(XCODE_VERSION).app;sudo xcode-select --switch /Applications/Xcode_$(XCODE_VERSION).app/Contents/Developer
-  displayName: Switch to the latest Xcode
+# - task: UseDotNet@2
+#   displayName: 'Use .Net Core sdk'
+#   inputs:
+#      version: $(NETCORE_VERSION)
+#      includePreviewVersions: false
 
-- task: UseDotNet@2
-  displayName: 'Use .Net Core sdk'
-  inputs:
-     version: $(NETCORE_VERSION)
-     includePreviewVersions: false
+# build and pack a beta version of the NuGet package. Versioning is done through the name tag in this definition.
+# - task: MSBuild@1
+#   displayName: 'Build & Pack beta build'
+#   inputs:
+#     solution: 'src/Plugin.PushNotification/Plugin.PushNotification.csproj'
+#     configuration: 'Release'
+#     msbuildArguments: '/restore /t:Build /p:ContinuousIntegrationBuild=true /p:Deterministic=false /t:Pack /p:PackageVersion=$(Build.BuildNumber)-beta /p:PackageOutputPath=$(build.artifactstagingdirectory)/beta /p:AssemblyFileVersion=$(Build.BuildNumber)'
+#     clean: true
 
+# build and pack a final version of the NuGet package. Versioning is done through the name tag in this definition.
 - task: MSBuild@1
-  displayName: 'Build solution'
+  displayName: 'Build & Pack final build'
   inputs:
-    solution: 'src/**/*.sln'
-    msbuildArguments: '/restore /t:Build /p:ContinuousIntegrationBuild=true /p:Deterministic=false /p:PackageOutputPath=$(build.artifactstagingdirectory)'
+    solution: 'src/Plugin.PushNotification/Plugin.PushNotification.csproj'
+    configuration: 'Release'
+    msbuildArguments: '/restore /t:Build /p:ContinuousIntegrationBuild=true /p:Deterministic=false /t:Pack /p:PackageVersion=$(Build.BuildNumber) /p:PackageOutputPath=$(build.artifactstagingdirectory)/final /p:AssemblyFileVersion=$(Build.BuildNumber)'
     clean: true
+    
+# copy all the nupkg files created to the artifact directory
+- task: CopyFiles@2
+  displayName: 'Copy Files to: $(build.artifactstagingdirectory)'
+  inputs:
+    SourceFolder: '$(build.sourcesdirectory)'
+    Contents: '**\*.nupkg'
+    TargetFolder: '$(build.artifactstagingdirectory)'
+- task: NuGetCommand@2
+  inputs:
+    command: 'push'
+    packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
+    nuGetFeedType: 'internal'
+    publishVstsFeed: 'f64f6e16-0574-4b91-8d00-0c5742228fae/b4889b15-c3ca-4c10-862e-60121d68680c'
+# publish the artifacts as results of the build
+# - task: PublishBuildArtifacts@1
+#   displayName: 'Publish Artifact: drop'

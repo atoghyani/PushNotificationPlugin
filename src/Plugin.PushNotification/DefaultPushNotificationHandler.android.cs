@@ -128,6 +128,8 @@ namespace Plugin.PushNotification
         /// </summary>
         public const string NumberKey = "number";
 
+        public bool isHigherThanAndroidEleven => Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.S;
+
         public virtual void OnOpened(NotificationResponse response)
         {
             System.Diagnostics.Debug.WriteLine($"{DomainTag} - OnOpened");
@@ -360,7 +362,9 @@ namespace Plugin.PushNotification
                 resultIntent.SetFlags(PushNotificationManager.NotificationActivityFlags.Value);
             }
             var requestCode = new Java.Util.Random().NextInt();
-            var pendingIntent = PendingIntent.GetActivity(context, requestCode, resultIntent, PendingIntentFlags.UpdateCurrent);
+            var pendingIntent = isHigherThanAndroidEleven ? 
+            PendingIntent.GetActivity(context, requestCode, resultIntent, PendingIntentFlags.Mutable):
+            PendingIntent.GetActivity(context, requestCode, resultIntent, PendingIntentFlags.UpdateCurrent);
 
             if (parameters.TryGetValue(ChannelIdKey, out var channelId) && channelId != null)
             {
@@ -393,7 +397,9 @@ namespace Plugin.PushNotification
 
             if (parameters.TryGetValue(FullScreenIntentKey, out var fullScreenIntent) && ($"{fullScreenIntent}" == "true" || $"{fullScreenIntent}" == "1"))
             {
-                var fullScreenPendingIntent = PendingIntent.GetActivity(context, requestCode, resultIntent, PendingIntentFlags.UpdateCurrent);
+                var fullScreenPendingIntent = isHigherThanAndroidEleven ?
+                PendingIntent.GetActivity(context, requestCode, resultIntent, PendingIntentFlags.Mutable):
+                PendingIntent.GetActivity(context, requestCode, resultIntent, PendingIntentFlags.UpdateCurrent);
                 notificationBuilder.SetFullScreenIntent(fullScreenPendingIntent,true);
                 notificationBuilder.SetCategory(NotificationCompat.CategoryCall);
                 parameters[PriorityKey] = "high";
@@ -401,7 +407,9 @@ namespace Plugin.PushNotification
 
             var deleteIntent = new Intent(context, typeof(PushNotificationDeletedReceiver));
             deleteIntent.PutExtras(extras);
-            var pendingDeleteIntent = PendingIntent.GetBroadcast(context, requestCode, deleteIntent, PendingIntentFlags.UpdateCurrent);
+            var pendingDeleteIntent = isHigherThanAndroidEleven ?
+            PendingIntent.GetBroadcast(context, requestCode, deleteIntent, PendingIntentFlags.Mutable) :
+            PendingIntent.GetBroadcast(context, requestCode, deleteIntent, PendingIntentFlags.UpdateCurrent);
             notificationBuilder.SetDeleteIntent(pendingDeleteIntent);
 
             if (Build.VERSION.SdkInt < BuildVersionCodes.O)
@@ -504,7 +512,9 @@ namespace Plugin.PushNotification
 
                                     extras.PutString(ActionIdentifierKey, action.Id);
                                     actionIntent.PutExtras(extras);
-                                    pendingActionIntent = PendingIntent.GetActivity(context, aRequestCode, actionIntent, PendingIntentFlags.UpdateCurrent);
+                                    pendingActionIntent = isHigherThanAndroidEleven ?
+                                    PendingIntent.GetActivity(context, aRequestCode, actionIntent, PendingIntentFlags.Mutable):
+                                    PendingIntent.GetActivity(context, aRequestCode, actionIntent, PendingIntentFlags.UpdateCurrent);
                                     nAction= new NotificationCompat.Action.Builder(context.Resources.GetIdentifier(action.Icon, "drawable", Application.Context.PackageName), action.Title, pendingActionIntent).Build();
                                 }
                                 else if(action.Type == NotificationActionType.Reply)
@@ -515,7 +525,9 @@ namespace Plugin.PushNotification
                                     extras.PutString(ActionIdentifierKey, action.Id);
                                     actionIntent.PutExtras(extras);
 
-                                    pendingActionIntent = PendingIntent.GetBroadcast(context, aRequestCode, actionIntent, PendingIntentFlags.UpdateCurrent);
+                                    pendingActionIntent = isHigherThanAndroidEleven ?
+                                    PendingIntent.GetBroadcast(context, aRequestCode, actionIntent, PendingIntentFlags.Mutable):
+                                    PendingIntent.GetBroadcast(context, aRequestCode, actionIntent, PendingIntentFlags.UpdateCurrent);
 
                                     nAction = new NotificationCompat.Action.Builder(context.Resources.GetIdentifier(action.Icon, "drawable", Application.Context.PackageName), action.Title, pendingActionIntent)
                                         .SetAllowGeneratedReplies(true)

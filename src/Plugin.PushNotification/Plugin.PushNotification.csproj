@@ -66,20 +66,20 @@
     <Compile Include="**\*.uwp.cs" />
     <Compile Include="**\*.uwp.*.cs" />
   </ItemGroup>
-  <ItemGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid')) ">
+  <ItemGroup Condition=" $(TargetFramework.Contains('android')) ">
     <PackageReference Include="Xamarin.Firebase.Messaging" Version="119.0.1" />
     <Compile Include="**\*.android.cs" />
     <Compile Include="**\*.android.*.cs" />
   </ItemGroup>
 
-  <ItemGroup Condition=" $(TargetFramework.StartsWith('Xamarin.iOS')) ">
+  <ItemGroup Condition=" $(TargetFramework.Contains('ios')) ">
     <Compile Include="**\*.apple.cs" />
      <Compile Include="**\*.apple.*.cs" />
     <Compile Include="**\*.ios.cs" />
     <Compile Include="**\*.ios.*.cs" />
   </ItemGroup>
 
-  <ItemGroup Condition=" $(TargetFramework.StartsWith('Xamarin.Mac')) ">
+  <ItemGroup Condition=" $(TargetFramework.Contains('mac')) ">
     <Compile Include="**\*.apple.cs" />
     <Compile Include="**\*.apple.*.cs" />
     <Compile Include="**\*.macos.cs" />

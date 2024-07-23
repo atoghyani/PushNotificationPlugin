@@ -1,9 +1,9 @@
 variables:
   MONO_VERSION: 6_4_0
-  NETCORE_VERSION: '3.0.x'
+  NETCORE_VERSION: '8.0.x'
 
 # set the version numbering, this results in 1.0.1 for the first build incrementing that way.
-name: 3.7$(rev:.r)
+name: 4.0$(rev:.r)
 
 # Defines that a commit to the master branch should trigger this build
 # trigger:
@@ -15,13 +15,22 @@ name: 3.7$(rev:.r)
 
 # the machine and prerequisites to run this build on
 pool:
-  vmImage: macos-12
+  vmImage: macos-13
 
 # The different steps in our build
 steps:
 
-# - bash: sudo $AGENT_HOMEDIRECTORY/scripts/select-xamarin-sdk.sh $(MONO_VERSION)
-#   displayName: Switch to the latest Xamarin SDK
+- task: CmdLine@2
+  inputs:
+    script: |
+      dotnet nuget locals all --clear 
+      dotnet workload install maui 
+      dotnet workload install android ios maui
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'restore'
+    projects: '**/*.sln'
+    feedsToUse: 'select'
 
 # - task: UseDotNet@2
 #   displayName: 'Use .Net Core sdk'
@@ -39,13 +48,13 @@ steps:
 #     clean: true
 
 # build and pack a final version of the NuGet package. Versioning is done through the name tag in this definition.
-- task: MSBuild@1
-  displayName: 'Build & Pack final build'
+
+- task: DotNetCoreCLI@2
   inputs:
-    solution: 'src/Plugin.PushNotification/Plugin.PushNotification.csproj'
-    configuration: 'Release'
-    msbuildArguments: '/restore /t:Build /p:ContinuousIntegrationBuild=true /p:Deterministic=false /t:Pack /p:PackageVersion=$(Build.BuildNumber) /p:PackageOutputPath=$(build.artifactstagingdirectory)/final /p:AssemblyFileVersion=$(Build.BuildNumber)'
-    clean: true
+    command: 'pack'
+    packagesToPack: 'src/Plugin.PushNotification/Plugin.PushNotification.csproj'
+    versioningScheme: 'off'
+    buildProperties: 'ContinuousIntegrationBuild=true /p:Deterministic=false -t:Pack /p:PackageVersion=$(Build.BuildNumber) /p:PackageOutputPath=$(build.artifactstagingdirectory)/final /p:AssemblyFileVersion=$(Build.BuildNumber) /p:--no-restore'
     
 # copy all the nupkg files created to the artifact directory
 - task: CopyFiles@2
@@ -54,12 +63,7 @@ steps:
     SourceFolder: '$(build.sourcesdirectory)'
     Contents: '**\*.nupkg'
     TargetFolder: '$(build.artifactstagingdirectory)'
-- task: NuGetCommand@2
-  inputs:
-    command: 'push'
-    packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
-    nuGetFeedType: 'internal'
-    publishVstsFeed: 'f64f6e16-0574-4b91-8d00-0c5742228fae/b4889b15-c3ca-4c10-862e-60121d68680c'
+
 # publish the artifacts as results of the build
 # - task: PublishBuildArtifacts@1
 #   displayName: 'Publish Artifact: drop'

@@ -37,7 +37,6 @@
     <Owners>crossgeeks,rdelrosario</Owners>
     <Authors>Rendy Del Rosario, Sameer Khandekar, Px7-941</Authors>
     <Copyright>Copyright 2017 CrossGeeks</Copyright>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 	</PropertyGroup>
 	<ItemGroup Condition="$(TargetFramework.StartsWith('net8.0-android')) == true">
 		<PackageReference Include="Xamarin.Firebase.Messaging" Version="123.1.2.2">

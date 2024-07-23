@@ -13,6 +13,7 @@ using Android.OS;
 using Firebase.Iid;
 using Firebase.Messaging;
 using Java.Interop;
+using Application = Android.App.Application;
 
 namespace Plugin.PushNotification
 {
@@ -36,7 +37,7 @@ namespace Plugin.PushNotification
         public static int LargeIconResource { get; set; }
         public static bool ShouldShowWhen { get; set; } = true;
         public static Android.Net.Uri SoundUri { get; set; }
-        public static Color? Color { get; set; }
+        public static Android.Graphics.Color? Color { get; set; }
         public static Type NotificationActivityType { get; set; }
         public static ActivityFlags? NotificationActivityFlags { get; set; } = ActivityFlags.ClearTop | ActivityFlags.SingleTop;
 
@@ -99,7 +100,7 @@ namespace Plugin.PushNotification
                     }
                     else
                     {
-                        _onNotificationOpened?.Invoke(CrossPushNotification.Current, new PushNotificationResponseEventArgs(response.Data, response.Identifier, response.Type,response.Result));
+                        _onNotificationOpened?.Invoke(CrossPushNotification.Current, new PushNotificationResponseEventArgs(response.Data, response.Identifier, response.Type, response.Result));
                     }
                     CrossPushNotification.Current.NotificationHandler?.OnOpened(response);
                 }
@@ -111,13 +112,13 @@ namespace Plugin.PushNotification
                     }
                     else
                     {
-                        _onNotificationAction?.Invoke(CrossPushNotification.Current, new PushNotificationResponseEventArgs(response.Data, response.Identifier, response.Type,response.Result));
+                        _onNotificationAction?.Invoke(CrossPushNotification.Current, new PushNotificationResponseEventArgs(response.Data, response.Identifier, response.Type, response.Result));
                     }
 
                     CrossPushNotification.Current.NotificationHandler?.OnAction(response);
                 }
 
-               
+
             }
         }
 
@@ -230,7 +231,8 @@ namespace Plugin.PushNotification
         async Task<string> GetTokenAsync()
         {
             _tokenTcs = new TaskCompletionSource<string>();
-            FirebaseInstanceId.Instance.GetInstanceId().AddOnCompleteListener(this);
+
+            FirebaseMessaging.Instance.GetToken().AddOnCompleteListener(this);
             string retVal = null;
 
             try
@@ -268,7 +270,7 @@ namespace Plugin.PushNotification
 
         void CleanUp()
         {
-            FirebaseInstanceId.Instance.DeleteInstanceId();
+            FirebaseMessaging.Instance.DeleteToken();
             Token = string.Empty;
         }
 
@@ -425,9 +427,9 @@ namespace Plugin.PushNotification
         {
             _onTokenRefresh?.Invoke(CrossPushNotification.Current, new PushNotificationTokenEventArgs(token));
         }
-        internal static void RegisterAction(IDictionary<string, object> data,string result = null)
+        internal static void RegisterAction(IDictionary<string, object> data, string result = null)
         {
-            var response = new NotificationResponse(data, data.ContainsKey(DefaultPushNotificationHandler.ActionIdentifierKey) ? $"{data[DefaultPushNotificationHandler.ActionIdentifierKey]}" : string.Empty, NotificationCategoryType.Default,result);
+            var response = new NotificationResponse(data, data.ContainsKey(DefaultPushNotificationHandler.ActionIdentifierKey) ? $"{data[DefaultPushNotificationHandler.ActionIdentifierKey]}" : string.Empty, NotificationCategoryType.Default, result);
 
             _onNotificationAction?.Invoke(CrossPushNotification.Current, new PushNotificationResponseEventArgs(response.Data, response.Identifier, response.Type));
         }
@@ -458,7 +460,7 @@ namespace Plugin.PushNotification
             {
                 if (task.IsSuccessful)
                 {
-                    string token = task.Result.JavaCast<IInstanceIdResult>().Token;
+                    string token = task.Result.ToString();
                     _tokenTcs?.TrySetResult(token);
                 }
                 else
@@ -502,6 +504,4 @@ namespace Plugin.PushNotification
 
         #endregion
     }
-
-
 }

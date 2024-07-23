@@ -1,24 +1,29 @@
-﻿<Project Sdk="MSBuild.Sdk.Extras/2.0.41">
-
-  <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;MonoAndroid12.0;Xamarin.Mac20;</TargetFrameworks>
-    <TargetFrameworks Condition=" $(OS) == 'WINDOWS_NT' ">uap10.0.16299;$(TargetFrameworks)</TargetFrameworks>
-    <AssemblyName>Plugin.PushNotification</AssemblyName>
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFrameworks>net8.0-android;net8.0-ios;</TargetFrameworks>
+		<!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
+		<!-- <TargetFrameworks>$(TargetFrameworks);net8.0-tizen</TargetFrameworks> -->
+		<UseMaui>true</UseMaui>
+		<SingleProject>true</SingleProject>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">11.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">13.1</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
+		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
+		    <AssemblyName>Plugin.PushNotification</AssemblyName>
     <RootNamespace>Plugin.PushNotification</RootNamespace>
     <PackageId>Plugin.PushNotification</PackageId>
-    <Product>$(AssemblyName) ($(TargetFramework))</Product>
-    <AssemblyVersion>1.4.0</AssemblyVersion>
-    <AssemblyFileVersion>1.4.0</AssemblyFileVersion>
-    <Version>1.4.0</Version>
+    <AssemblyVersion>4.0.0</AssemblyVersion>
+    <AssemblyFileVersion>4.0.0</AssemblyFileVersion>
+    <Version>4.0.0</Version>
     <PackOnBuild>true</PackOnBuild>
     <NeutralLanguage>en</NeutralLanguage>
     <LangVersion>default</LangVersion>
-    <DefineConstants>$(DefineConstants);</DefineConstants>
-
-    <UseFullSemVerForNuGet>false</UseFullSemVerForNuGet>
-    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
-
-    <LangVersion>latest</LangVersion>
+		<LangVersion>latest</LangVersion>
     <PackageLicenseUrl>https://github.com/CrossGeeks/PushNotificationPlugin/blob/master/LICENSE.md</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/CrossGeeks/PushNotificationPlugin</PackageProjectUrl>
     <PackageIconUrl>https://github.com/CrossGeeks/PushNotificationPlugin/blob/master/assets/icon.png?raw=true</PackageIconUrl>
@@ -33,63 +38,27 @@
     <Authors>Rendy Del Rosario, Sameer Khandekar, Px7-941</Authors>
     <Copyright>Copyright 2017 CrossGeeks</Copyright>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-  </PropertyGroup>
-
-    <!-- Define what happens on build and release -->
-   <PropertyGroup Condition=" '$(Configuration)'=='Debug' ">
-    <DebugType>full</DebugType>
-    <DebugSymbols>true</DebugSymbols>
-    <GenerateDocumentationFile>false</GenerateDocumentationFile>
-  </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(Configuration)'=='Release' ">
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <DebugType>pdbonly</DebugType>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <NoWarn>1701;1702;1591</NoWarn>
-    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\Plugin.PushNotification.xml</DocumentationFile>
-    <Company>Rendy Del Rosario, Sameer Khandekar, Px7-941</Company>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <Compile Include="**\*.shared.cs" />
-    <Compile Include="**\*.shared.*.cs" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
-  </ItemGroup>
-  <ItemGroup Condition=" $(TargetFramework.StartsWith('uap')) ">
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-    <Compile Include="**\*.uwp.cs" />
-    <Compile Include="**\*.uwp.*.cs" />
-  </ItemGroup>
-  <ItemGroup Condition=" $(TargetFramework.Contains('android')) ">
-    <PackageReference Include="Xamarin.Firebase.Messaging" Version="119.0.1" />
-    <Compile Include="**\*.android.cs" />
-    <Compile Include="**\*.android.*.cs" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" $(TargetFramework.Contains('ios')) ">
-    <Compile Include="**\*.apple.cs" />
-     <Compile Include="**\*.apple.*.cs" />
-    <Compile Include="**\*.ios.cs" />
-    <Compile Include="**\*.ios.*.cs" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" $(TargetFramework.Contains('mac')) ">
-    <Compile Include="**\*.apple.cs" />
-    <Compile Include="**\*.apple.*.cs" />
-    <Compile Include="**\*.macos.cs" />
-    <Compile Include="**\*.macos.*.cs" />
-  </ItemGroup>
-
-  <!--<ItemGroup Condition=" $(TargetFramework.StartsWith('Xamarin.TVOS')) ">
-    <Compile Include="**\*.apple.cs" />
-    <Compile Include="**\*.apple.*.cs" />
-    <Compile Include="**\*.ios.cs" />
-    <Compile Include="**\*.ios.*.cs" />
-  </ItemGroup>-->
+	</PropertyGroup>
+	<ItemGroup Condition="$(TargetFramework.StartsWith('net8.0-android')) == true">
+		<PackageReference Include="Xamarin.Firebase.Messaging" Version="123.1.2.2">
+		</PackageReference>
+		<PackageReference Include="Xamarin.GooglePlayServices.Tasks" Version="118.0.2.3">
+		</PackageReference>
+		<PackageReference Include="Xamarin.Firebase.Common" Version="120.3.3.1" />
+		<!--Temporary workaround for issue in AndroidX: https://github.com/xamarin/AndroidX/issues/742-->
+		<PackageReference Include="Xamarin.AndroidX.Activity" Version="1.7.2.1" />
+		<PackageReference Include="Xamarin.AndroidX.Activity.Ktx" Version="1.7.2.1" />
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
+		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" />
+	</ItemGroup>
+	<ItemGroup>
+		<None Remove="Platforms\Android\" />
+		<None Remove="Platforms\iOS\" />
+	</ItemGroup>
+	<ItemGroup>
+		<Folder Include="Platforms\Android\" />
+		<Folder Include="Platforms\iOS\" />
+	</ItemGroup>
 </Project>

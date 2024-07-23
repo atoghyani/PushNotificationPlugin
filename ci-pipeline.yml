@@ -20,13 +20,12 @@ pool:
 # The different steps in our build
 steps:
 
-- task: NuGetCommand@2
+
+- task: DotNetCoreCLI@2
   inputs:
     command: 'restore'
-    restoreSolution: '**/*.sln'
+    projects: '**/*.sln'
     feedsToUse: 'select'
-# - bash: sudo $AGENT_HOMEDIRECTORY/scripts/select-xamarin-sdk.sh $(MONO_VERSION)
-#   displayName: Switch to the latest Xamarin SDK
 
 # - task: UseDotNet@2
 #   displayName: 'Use .Net Core sdk'

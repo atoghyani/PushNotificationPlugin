@@ -54,7 +54,7 @@ steps:
     command: 'pack'
     packagesToPack: 'src/Plugin.PushNotification/Plugin.PushNotification.csproj'
     versioningScheme: 'off'
-    buildProperties: '/p:ContinuousIntegrationBuild=true /p:Deterministic=false -t:Pack /p:PackageVersion=$(Build.BuildNumber) /p:PackageOutputPath=$(build.artifactstagingdirectory)/final /p:AssemblyFileVersion=$(Build.BuildNumber) /p:--no-restore'
+    buildProperties: 'ContinuousIntegrationBuild=true /p:Deterministic=false -t:Pack /p:PackageVersion=$(Build.BuildNumber) /p:PackageOutputPath=$(build.artifactstagingdirectory)/final /p:AssemblyFileVersion=$(Build.BuildNumber) /p:--no-restore'
     
 # copy all the nupkg files created to the artifact directory
 - task: CopyFiles@2

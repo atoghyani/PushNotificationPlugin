@@ -51,11 +51,10 @@ steps:
 
 - task: DotNetCoreCLI@2
   inputs:
-    command: 'pack'
+    command: 'build'
     packagesToPack: 'src/Plugin.PushNotification/Plugin.PushNotification.csproj'
     versioningScheme: 'off'
     buildProperties: 'ContinuousIntegrationBuild=true /p:Deterministic=false -t:Pack /p:PackageVersion=$(Build.BuildNumber) /p:PackageOutputPath=$(build.artifactstagingdirectory)/final /p:AssemblyFileVersion=$(Build.BuildNumber) /p:--no-restore'
-    
 # copy all the nupkg files created to the artifact directory
 - task: CopyFiles@2
   displayName: 'Copy Files to: $(build.artifactstagingdirectory)'

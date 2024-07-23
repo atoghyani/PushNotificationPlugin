@@ -20,6 +20,11 @@ pool:
 # The different steps in our build
 steps:
 
+- task: NuGetCommand@2
+  inputs:
+    command: 'restore'
+    restoreSolution: '**/*.sln'
+    feedsToUse: 'select'
 # - bash: sudo $AGENT_HOMEDIRECTORY/scripts/select-xamarin-sdk.sh $(MONO_VERSION)
 #   displayName: Switch to the latest Xamarin SDK
 
@@ -44,7 +49,7 @@ steps:
   inputs:
     solution: 'src/Plugin.PushNotification/Plugin.PushNotification.csproj'
     configuration: 'Release'
-    msbuildArguments: '/restore /t:Build /p:ContinuousIntegrationBuild=true /p:Deterministic=false /t:Pack /p:PackageVersion=$(Build.BuildNumber) /p:PackageOutputPath=$(build.artifactstagingdirectory)/final /p:AssemblyFileVersion=$(Build.BuildNumber)'
+    msbuildArguments: '/t:Build /p:ContinuousIntegrationBuild=true /p:Deterministic=false /t:Pack /p:PackageVersion=$(Build.BuildNumber) /p:PackageOutputPath=$(build.artifactstagingdirectory)/final /p:AssemblyFileVersion=$(Build.BuildNumber)'
     clean: true
     
 # copy all the nupkg files created to the artifact directory
@@ -54,12 +59,7 @@ steps:
     SourceFolder: '$(build.sourcesdirectory)'
     Contents: '**\*.nupkg'
     TargetFolder: '$(build.artifactstagingdirectory)'
-- task: NuGetCommand@2
-  inputs:
-    command: 'push'
-    packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
-    nuGetFeedType: 'internal'
-    publishVstsFeed: 'f64f6e16-0574-4b91-8d00-0c5742228fae/b4889b15-c3ca-4c10-862e-60121d68680c'
+
 # publish the artifacts as results of the build
 # - task: PublishBuildArtifacts@1
 #   displayName: 'Publish Artifact: drop'

@@ -65,5 +65,12 @@ steps:
     TargetFolder: '$(build.artifactstagingdirectory)'
 
 # publish the artifacts as results of the build
-# - task: PublishBuildArtifacts@1
-#   displayName: 'Publish Artifact: drop'
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: drop'
+  
+- task: NuGetCommand@2
+  inputs:
+    command: 'push'
+    packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
+    nuGetFeedType: 'internal'
+    publishVstsFeed: 'f64f6e16-0574-4b91-8d00-0c5742228fae/b4889b15-c3ca-4c10-862e-60121d68680c'

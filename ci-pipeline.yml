@@ -48,13 +48,13 @@ steps:
 #     clean: true
 
 # build and pack a final version of the NuGet package. Versioning is done through the name tag in this definition.
-- task: MSBuild@1
-  displayName: 'Build & Pack final build'
+
+- task: DotNetCoreCLI@2
   inputs:
-    solution: 'src/Plugin.PushNotification/Plugin.PushNotification.csproj'
-    configuration: 'Release'
-    msbuildArguments: '/t:Build /p:ContinuousIntegrationBuild=true /p:Deterministic=false /t:Pack /p:PackageVersion=$(Build.BuildNumber) /p:PackageOutputPath=$(build.artifactstagingdirectory)/final /p:AssemblyFileVersion=$(Build.BuildNumber)'
-    clean: true
+    command: 'pack'
+    packagesToPack: '**/*.csproj'
+    versioningScheme: 'off'
+    buildProperties: '--no-restore /p:ContinuousIntegrationBuild=true /p:Deterministic=false /t:Pack /p:PackageVersion=$(Build.BuildNumber) /p:PackageOutputPath=$(build.artifactstagingdirectory)/final /p:AssemblyFileVersion=$(Build.BuildNumber)'
     
 # copy all the nupkg files created to the artifact directory
 - task: CopyFiles@2
